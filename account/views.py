@@ -341,6 +341,13 @@ class LoginView(FormView):
 
     def after_login(self, form):
         signals.user_logged_in.send(sender=LoginView, user=form.user, form=form)
+        if getattr(settings, 'GEOWATCH_ENABLED', False):
+            try:
+                from geonode.contrib.geowatch.utils import geowatch_run
+                geowatch_run('login', form.user)
+            except:
+                print "Error: Could not run GeoWatch watchlist for user login."
+
 
     def get_success_url(self, fallback_url=None, **kwargs):
         if fallback_url is None:
